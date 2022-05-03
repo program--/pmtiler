@@ -12,7 +12,7 @@ import (
 	"github.com/paulmach/orb/maptile"
 	"github.com/paulmach/orb/maptile/tilecover"
 
-	tiles "partiles/tiles"
+	tiles "pmtiler/tiles"
 )
 
 func GeoJSONToTiles(path string, fc *geojson.FeatureCollection, layer_name string, max_zoom maptile.Zoom) error {

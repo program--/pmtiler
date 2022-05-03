@@ -1,8 +1,8 @@
 package geojson
 
 import (
-	ptio "partiles/io"
 	"path/filepath"
+	ptio "pmtiler/io"
 	"testing"
 
 	"github.com/paulmach/orb/maptile"
