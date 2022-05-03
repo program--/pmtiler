@@ -2,6 +2,7 @@ package io
 
 import (
 	"context"
+	"errors"
 	"net/url"
 	"strings"
 
@@ -76,13 +77,34 @@ func ParquetToGeoJSON(path string, x string, y string) (*geojson.FeatureCollecti
 	}
 
 	features := make([]*geojson.Feature, rows)
-	xmax := data[x][0].(float64)
-	xmin := data[x][0].(float64)
-	ymax := data[y][0].(float64)
-	ymin := data[y][0].(float64)
+
+	// Handle Root\x01... column names
+	X := x
+	Y := y
+	xcoords, ok := data[X]
+	if !ok {
+		X = strings.Join([]string{"Root\x01", x}, "")
+		xcoords, ok = data[X]
+		if !ok {
+			return nil, errors.New("x coordinates column can't be read")
+		}
+	}
+	ycoords, ok := data[Y]
+	if !ok {
+		Y = strings.Join([]string{"Root\x01", y}, "")
+		ycoords, ok = data[Y]
+		if !ok {
+			return nil, errors.New("y coordinates column can't be read")
+		}
+	}
+
+	xmax := xcoords[0].(float64)
+	xmin := xcoords[0].(float64)
+	ymax := ycoords[0].(float64)
+	ymin := ycoords[0].(float64)
 	for i := int64(0); i < rows; i++ {
-		xcurr := data[x][i].(float64)
-		ycurr := data[y][i].(float64)
+		xcurr := xcoords[i].(float64)
+		ycurr := ycoords[i].(float64)
 		features[i] = geojson.NewFeature(orb.Point{xcurr, ycurr})
 
 		if xmax < xcurr {
@@ -104,7 +126,7 @@ func ParquetToGeoJSON(path string, x string, y string) (*geojson.FeatureCollecti
 		for _, v := range schema {
 			key := strings.Replace(v, "Schema\u0001", "", 1)
 
-			if key != x && key != y {
+			if key != X && key != Y {
 				features[i].Properties[key] = data[key][i]
 			}
 		}

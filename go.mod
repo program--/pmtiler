@@ -3,7 +3,8 @@ module pmtiler
 go 1.18
 
 require (
-	github.com/aws/aws-sdk-go v1.44.4
+	github.com/aws/aws-sdk-go v1.44.5
+	github.com/lukeroth/gdal v0.0.0-20211109203239-b571df3ee436
 	github.com/paulmach/orb v0.5.0
 	github.com/urfave/cli/v2 v2.5.1
 	github.com/xitongsys/parquet-go v1.6.2

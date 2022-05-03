@@ -11,6 +11,10 @@ import (
 func TestWritingPMTiles(t *testing.T) {
 	tiles_path := filepath.Join("..", "testdata", "sample.pmtiles")
 	parquet_path := "s3://example/data/path.parquet"
+	if parquet_path == "s3://example/data/path.parquet" {
+		t.Skip("S3 file path needs to be modified")
+	}
+
 	fc, err := ptio.ParquetToGeoJSON(parquet_path, "X", "Y")
 	if err != nil {
 		t.Fatal("failed to parse Parquet to GeoJSON:", err)

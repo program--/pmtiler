@@ -27,7 +27,7 @@ func GeoJSONToTiles(path string, fc *geojson.FeatureCollection, layer_name strin
 
 			fcclone := geojson.NewFeatureCollection()
 			for _, g := range fc.Features {
-				if bound.Contains(g.Geometry.(orb.Point)) {
+				if bound.Intersects(g.Geometry.Bound()) { // not correct for non-point geometry
 					newg := new(geojson.Feature)
 					*newg = *g
 					fcclone.Append(newg)

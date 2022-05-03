@@ -8,16 +8,19 @@ import (
 	gj "pmtiler/geojson"
 	ptio "pmtiler/io"
 
+	"github.com/paulmach/orb/geojson"
 	"github.com/paulmach/orb/maptile"
 	"github.com/urfave/cli/v2"
 )
 
 func main() {
 	var (
-		output string
-		xcol   string
-		ycol   string
-		zoom   int
+		output    string
+		xcol      string
+		ycol      string
+		zoom      int
+		gdalFlag  bool
+		gdalLayer int
 	)
 
 	app := &cli.App{
@@ -58,8 +61,27 @@ func main() {
 				Usage:       "Maximum Zoom to write.",
 				Destination: &zoom,
 			},
+			&cli.BoolFlag{
+				Name:        "gdal",
+				Aliases:     []string{"g"},
+				Value:       true,
+				Usage:       "Use GDAL to open URLs.",
+				Destination: &gdalFlag,
+			},
+			&cli.IntFlag{
+				Name:        "layer",
+				Aliases:     []string{"l"},
+				Value:       0,
+				Usage:       "GDAL Layer to use.",
+				Destination: &gdalLayer,
+			},
 		},
 		Action: func(c *cli.Context) error {
+			var (
+				fc  *geojson.FeatureCollection
+				err error
+			)
+
 			input := c.Args().Get(0)
 			base := path.Base(input)
 			ext := path.Ext(input)
@@ -69,7 +91,11 @@ func main() {
 				output = filepath.Join(".", base+".pmtiles")
 			}
 
-			fc, err := ptio.ParquetToGeoJSON(input, xcol, ycol)
+			if gdalFlag {
+				fc, err = ptio.GDALFile(input, gdalLayer)
+			} else {
+				fc, err = ptio.ParquetToGeoJSON(input, xcol, ycol)
+			}
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -88,6 +114,3 @@ func main() {
 		log.Fatal(err)
 	}
 }
-
-// pmtiler [global options] command [command options] [arguments...]
-// pmtiler -o tiles.pmtiles s3://...
